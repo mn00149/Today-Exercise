@@ -1,7 +1,7 @@
 package com.todayexercise.config.auth;
 
 import com.todayexercise.user.model.User;
-import com.todayexercise.user.UserRepository;
+import com.todayexercise.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

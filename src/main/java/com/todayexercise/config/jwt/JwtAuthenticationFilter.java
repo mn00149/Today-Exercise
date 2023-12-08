@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.todayexercise.config.auth.PrincipalDetails;
-import com.todayexercise.user.dto.LoginRequestDto;
+import com.todayexercise.user.dto.LoginRequestDTO;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -36,9 +36,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         // request에 있는 username과 password를 파싱해서 자바 Object로 받기
         ObjectMapper om = new ObjectMapper();
-        LoginRequestDto loginRequestDto = null;
+        LoginRequestDTO loginRequestDto = null;
         try {
-            loginRequestDto = om.readValue(request.getInputStream(), LoginRequestDto.class);
+            loginRequestDto = om.readValue(request.getInputStream(), LoginRequestDTO.class);
         } catch (Exception e) {
             e.printStackTrace();
         }

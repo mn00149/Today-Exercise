@@ -2,17 +2,13 @@ package com.todayexercise.config;
 
 import com.todayexercise.config.jwt.JwtAuthenticationFilter;
 import com.todayexercise.config.jwt.JwtAuthorizationFilter;
-import com.todayexercise.user.UserRepository;
-import jdk.jfr.Enabled;
+import com.todayexercise.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -37,7 +33,7 @@ public class SecurityConfig {
                 .formLogin().disable()//폼테그로 로그인 안되게 설정
                 .httpBasic().disable()
                 .authorizeRequests()
-                .antMatchers("/login","/users/register", "/swagger-ui/**", "/swagger-resources/**","/v3/api-docs/**").permitAll() //인증 필요 없는 url
+                .antMatchers("/login","/users/register", "/swagger-ui/**", "/swagger-resources/**","/v3/api-docs/**", "/redis/**").permitAll() //인증 필요 없는 url
                 .anyRequest().authenticated()
                 .and()
                 .build();

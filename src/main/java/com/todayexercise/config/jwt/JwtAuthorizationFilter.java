@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.todayexercise.config.auth.PrincipalDetails;
 import com.todayexercise.user.model.User;
-import com.todayexercise.user.UserRepository;
+import com.todayexercise.user.repository.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
