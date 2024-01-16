@@ -22,12 +22,6 @@ public class UserController {
     @Autowired
     UserService userService;
 
-    @Autowired
-    UserRepository userRepository;
-
-    @Autowired
-    BCryptPasswordEncoder bCryptPasswordEncoder;
-
     //단순 테스트용
     @GetMapping("/users/auth-test")
     public String test(){
@@ -69,10 +63,17 @@ public class UserController {
 
 
     //회원 관심 카테고리추가
+//    @PostMapping("/users/category")
+//    public CMRespDTO<?> registerCategory(@RequestBody CategoryDTO categoryDTO, HttpServletRequest request){
+//        ArrayList<Long> categories = categoryDTO.getCategories();
+//        userService.registerCategories(request, categories);
+//        return new CMRespDTO<>(1,"성공", null);
+//    }
+
     @PostMapping("/users/category")
     public CMRespDTO<?> registerCategory(@RequestBody CategoryDTO categoryDTO, HttpServletRequest request){
-        ArrayList<Long> categories = categoryDTO.getCategories();
-        userService.registerCategories(request, categories);
+        ArrayList<Long> categoryIdList = categoryDTO.getCategories();
+        userService.registerCategories(request, categoryIdList);
         return new CMRespDTO<>(1,"성공", null);
     }
 
