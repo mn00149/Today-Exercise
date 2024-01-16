@@ -1,7 +1,11 @@
 package com.todayexercise.category;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.todayexercise.challengeCategory.model.ChallengeCategory;
 import com.todayexercise.userTocategory.UserToCategory;
 import lombok.Data;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -20,5 +24,12 @@ public class Category {
 
 
     @OneToMany(mappedBy = "category")
+    @ToString.Exclude
+    @JsonIgnore
     private List<UserToCategory> userToCategories;
+
+
+    @OneToMany(mappedBy = "category")
+    @JsonIgnore
+    private List<ChallengeCategory> challengeCategories;
 }
