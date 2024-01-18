@@ -2,6 +2,8 @@ package com.todayexercise.config;
 
 import com.todayexercise.config.jwt.JwtAuthenticationFilter;
 import com.todayexercise.config.jwt.JwtAuthorizationFilter;
+import com.todayexercise.excepton.customExceptionClass.ExceptionHandlerFilter;
+import com.todayexercise.redis.repository.RefreshTokenRepository;
 import com.todayexercise.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -12,6 +14,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @EnableWebSecurity//해당 파일에서 시큐리티 설정
 @Configuration
@@ -22,6 +25,8 @@ public class SecurityConfig {
     @Autowired
     UserRepository userRepository;
 
+    @Autowired
+    RefreshTokenRepository refreshTokenRepository;
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
@@ -45,7 +50,7 @@ public class SecurityConfig {
             AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
             http
                     .addFilter(corsConfig.corsFilter())
-                    .addFilter(new JwtAuthenticationFilter(authenticationManager))
+                    .addFilter(new JwtAuthenticationFilter(authenticationManager, refreshTokenRepository))
                     .addFilter(new JwtAuthorizationFilter(authenticationManager, userRepository));
         }
     }

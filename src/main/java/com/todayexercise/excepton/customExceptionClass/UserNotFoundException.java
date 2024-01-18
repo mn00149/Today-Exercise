@@ -1,4 +1,4 @@
-package com.todayexercise.user;
+package com.todayexercise.excepton.customExceptionClass;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
