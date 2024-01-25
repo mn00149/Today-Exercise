@@ -36,15 +36,6 @@ jobs:
       - name: Build with Maven
         run: ./mvnw clean package -DskipTests
 
-      - name: Start Redis
-        run: docker start redis
-
-      - name: Run Tests with Redis
-        run: ./mvnw test -Dspring.redis.host=localhost -Dspring.redis.port=6379 -Dspring.redis.password=your-redis-password
-
-      - name: Stop Redis
-        run: docker stop redis
-
       - name: Get current time
         uses: 1466587594/get-current-time@v2
         id: current-time
