@@ -3,7 +3,7 @@ name: todayExercise
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   build:
@@ -30,17 +30,20 @@ jobs:
           java-version: 11
           distribution: 'adopt'
 
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./mvnw
+
+      - name: Build with Maven
+        run: ./mvnw clean package -DskipTests
+
       - name: Start Redis
         run: docker start redis
 
       - name: Run Tests with Redis
-        run: mvn test -Dspring.redis.host=localhost -Dspring.redis.port=6379 -Dspring.redis.password=your-redis-password
+        run: ./mvnw test -Dspring.redis.host=localhost -Dspring.redis.port=6379 -Dspring.redis.password=your-redis-password
 
       - name: Stop Redis
         run: docker stop redis
-
-      - name: Build with Maven
-        run: mvn clean package
 
       - name: Get current time
         uses: 1466587594/get-current-time@v2
