@@ -30,9 +30,6 @@ jobs:
           java-version: 11
           distribution: 'adopt'
 
-      - name: Build with Maven
-        run: mvn clean package
-
       - name: Start Redis
         run: docker start redis
 
@@ -41,6 +38,9 @@ jobs:
 
       - name: Stop Redis
         run: docker stop redis
+
+      - name: Build with Maven
+        run: mvn clean package
 
       - name: Get current time
         uses: 1466587594/get-current-time@v2
