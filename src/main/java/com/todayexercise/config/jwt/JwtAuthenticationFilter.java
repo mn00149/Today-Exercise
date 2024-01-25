@@ -1,30 +1,31 @@
 package com.todayexercise.config.jwt;
 
 
-import java.io.IOException;
-import java.util.Date;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.todayexercise.config.auth.PrincipalDetails;
+import com.todayexercise.redis.model.RefreshToken;
+import com.todayexercise.redis.repository.RefreshTokenRepository;
 import com.todayexercise.user.dto.LoginRequestDTO;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import lombok.RequiredArgsConstructor;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.Date;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
+
+    private final RefreshTokenRepository refreshTokenRepository;
 
     // Authentication 객체 만들어서 리턴 => 의존 : AuthenticationManager
     // 인증 요청시에 실행되는 함수 => /login
@@ -70,21 +71,33 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         return authentication;
     }
 
-    // JWT Token 생성해서 response에 담아주기
+    // Access Token과 Refresh Token을 생성해서 response에 담아주기
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
                                             Authentication authResult) throws IOException, ServletException {
 
         PrincipalDetails principalDetailis = (PrincipalDetails) authResult.getPrincipal();
 
-        String jwtToken = JWT.create()
+        String accessToken = JWT.create()
                 .withSubject(principalDetailis.getUsername())
                 .withExpiresAt(new Date(System.currentTimeMillis()+JwtProperties.EXPIRATION_TIME))
-                .withClaim("id", principalDetailis.getUser().getId())
+                //.withClaim("id", principalDetailis.getUser().getId())
                 .withClaim("userId", principalDetailis.getUser().getUserId())
                 .sign(Algorithm.HMAC512(JwtProperties.SECRET));
 
-        response.addHeader(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX+jwtToken);
+        String refreshToken = JWT.create()
+//                .withSubject(principalDetailis.getUsername())
+                .withSubject("refresh token")
+                .withExpiresAt(new Date(System.currentTimeMillis() + JwtProperties.REFRESH_EXPIRATION_TIME))
+                .withIssuedAt(new Date(System.currentTimeMillis()))
+                .withClaim("userId", principalDetailis.getUser().getUserId())
+                .sign(Algorithm.HMAC512(JwtProperties.SECRET));
+
+        refreshTokenRepository.save(new RefreshToken(principalDetailis.getUser().getUserId(),refreshToken));
+        response.addHeader(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX+accessToken);
+        //수정 될 수 있음
+        response.addHeader(JwtProperties.REFRESH_HEADER_STRING, JwtProperties.TOKEN_PREFIX+refreshToken);
+
     }
 
 }

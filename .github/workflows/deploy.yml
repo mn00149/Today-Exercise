@@ -1,0 +1,85 @@
+name: todayExercise
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 3
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: 11
+          distribution: 'adopt'
+
+      - name: Build with Maven
+        run: mvn clean package
+
+      - name: Start Redis
+        run: docker start redis
+
+      - name: Run Tests with Redis
+        run: mvn test -Dspring.redis.host=localhost -Dspring.redis.port=6379 -Dspring.redis.password=your-redis-password
+
+      - name: Stop Redis
+        run: docker stop redis
+
+      - name: Get current time
+        uses: 1466587594/get-current-time@v2
+        id: current-time
+        with:
+          format: YYYY-MM-DDTHH-mm-ss
+          utcOffset: "+09:00"
+
+      - name: Show Current Time
+        run: echo "CurrentTime=${{steps.current-time.outputs.formattedTime}}"
+
+      - name: Generate deployment package
+        run: |
+          mkdir -p deploy
+          cp target/*.jar deploy/application.jar
+          cp Procfile deploy/Procfile
+          cp -r .ebextensions deploy/.ebextensions
+          cd deploy && zip -r deploy.zip .
+
+      - name: Deploy to EB
+        uses: einaregilsson/beanstalk-deploy@v21
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_KEY }}
+          application_name: todayExercise
+          environment_name: TodayExercise-env
+          version_label: aws-v5-${{steps.current-time.outputs.formattedTime}}
+          region: ap-northeast-2
+          deployment_package: deploy/deploy.zip
+
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: Update RDS Database
+        run: |
+          aws rds modify-db-instance \
+            --db-instance-identifier your-rds-instance-id \
+            --master-user-password your-new-rds-password
