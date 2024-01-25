@@ -48,7 +48,7 @@ jobs:
       - name: Show Current Time
         run: echo "CurrentTime=${{steps.current-time.outputs.formattedTime}}"
 
-       # EB에 CD하기 위해 추가 작성
+      # EB에 CD하기 위해 추가 작성
       - name: Generate deployment package
           run: |
             mkdir -p deploy
