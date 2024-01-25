@@ -1,7 +1,8 @@
 package com.todayexercise.user.service;
 
 import com.todayexercise.category.Category;
-import com.todayexercise.user.dto.ResponseCategoryDTO;
+import com.todayexercise.category.CategoryRepository;
+import com.todayexercise.excepton.customExceptionClass.UserNotFoundException;
 import com.todayexercise.user.repository.UserRepository;
 import com.todayexercise.user.dto.UpdateDTO;
 import com.todayexercise.user.model.User;
@@ -16,13 +17,15 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class UserService {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    CategoryRepository categoryRepository;
 
     @Autowired
     UserToCategoryRepository userToCategoryRepository;
@@ -41,7 +44,9 @@ public class UserService {
 
 
     public boolean userIdDupliCheck(String userId) {
-        User user = userRepository.findByUserId(userId);
+        User user = userRepository.findByUserId(userId).orElseThrow(()
+                -> { return new UserNotFoundException("user id:"+userId);});
+
         if(user == null) return true;
         return false;
     }
@@ -57,7 +62,8 @@ public class UserService {
         // 1. 영속화
         // 1. 무조건 찾았다. 걱정마 get() 2. 못찾았어 익섹션 발동시킬께 orElseThrow()
         //User userEntity = userRepository.findByUserId(userId).orElseThrow(() -> { return new CustomValidationApiException("찾을 수 없는 id입니다.");});
-        User userEntity = userRepository.findByUserId(userId);
+        User userEntity = userRepository.findByUserId(userId).orElseThrow(()
+                -> { return new UserNotFoundException("user id:"+userId);});
 
         String updatedEmail = updateDTO.getEmail();
         String updatedAddress1 = updateDTO.getAddress1();
@@ -73,40 +79,47 @@ public class UserService {
         return userEntity;
     }
 
+    @Transactional
+    public User findById(Long userId){
+        User user = userRepository.findById(userId).orElseThrow(()->
+                new UserNotFoundException("id:"+userId));
+
+
+        return user;
+    }
 //    public void registerCategories(HttpServletRequest request, ArrayList<Long> categories) {
 //    }
+//    @Transactional
+//    public void registerCategories(HttpServletRequest request, ArrayList<Long> categories) {
+//        String userId = new CustomUtil().getUserIdByJWT(request);
+//        Long user_index = userRepository.findByUserId(userId).getId();
+//        for(Long category:categories){
+//            userToCategoryRepository.registCategory(user_index, category);
+//        }
+//    }
+
     @Transactional
-    public void registerCategories(HttpServletRequest request, ArrayList<Long> categories) {
+    public void registerCategories(HttpServletRequest request, ArrayList<Long> categoryIdList) {
         String userId = new CustomUtil().getUserIdByJWT(request);
-        Long user_index = userRepository.findByUserId(userId).getId();
-        for(Long category:categories){
-            userToCategoryRepository.registCategory(user_index, category);
+        User user = userRepository.findByUserId(userId).orElseThrow(()
+                -> { return new UserNotFoundException("user id:"+userId);});
+
+        //Long user_id = userRepository.findByUserId(userId).getId();
+        for(Long categoryId:categoryIdList){
+            UserToCategory userToCategory = new UserToCategory();
+            Category category = categoryRepository.findById(categoryId);
+            userToCategory.setUser(user);
+            userToCategory.setCategory(category);
+            userToCategoryRepository.save(userToCategory);
         }
     }
 
+
     @Transactional
-    public void registerCategories2(HttpServletRequest request, ArrayList<Long> categories) {
-        String userId = new CustomUtil().getUserIdByJWT(request);
-        Long user_index = userRepository.findByUserId(userId).getId();
+    public User findByUserId(String userId) {
+        User user = userRepository.findByUserId(userId).orElseThrow(()
+                -> { return new UserNotFoundException("user id:"+userId);});
 
+        return user;
     }
-
-    //수정 필요 카테고리 전체 조회 말고 특정조건에 맞는거 다 조회 하는 걸로
-//    @Transactional
-//    public ArrayList<Category> getCategories(HttpServletRequest request) {
-//        String userId = new CustomUtil().getUserIdByJWT(request);
-//        Long user_index = userRepository.findByUserId(userId).getId();
-//        List<UserToCategory> userToCategories = userToCategoryRepository.findAll();
-//        ArrayList<Category> categories2 = new ArrayList<Category>();
-//        ResponseCategoryDTO categories = new ResponseCategoryDTO();
-//        for(UserToCategory userToCategory: userToCategories){
-//            if(userToCategory.getUser().getId()==user_index){
-//                categories.setCategories(userToCategory.getCategory().getCategory());
-//            };
-//        }
-//
-//
-//        return categories2;
-//
-//    }
 }

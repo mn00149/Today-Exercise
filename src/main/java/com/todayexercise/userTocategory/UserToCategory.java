@@ -1,13 +1,19 @@
 package com.todayexercise.userTocategory;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.todayexercise.category.Category;
 import com.todayexercise.user.model.User;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import javax.persistence.*;
 
 @Entity
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "user_category")
 public class UserToCategory {
     @Id
@@ -15,12 +21,13 @@ public class UserToCategory {
     @Column(name="user_category_id")
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_index")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
+
 
 }
