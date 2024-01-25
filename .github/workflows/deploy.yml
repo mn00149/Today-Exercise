@@ -61,8 +61,8 @@ jobs:
         with:
           aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
           aws_secret_key: ${{ secrets.AWS_SECRET_KEY }}
-          application_name: todayExercise
-          environment_name: TodayExercise-env
+          application_name: todayExercise2
+          environment_name: TodayExercise2-env
           version_label: aws-v5-${{steps.current-time.outputs.formattedTime}}
           region: us-east-1
           deployment_package: deploy/deploy.zip
