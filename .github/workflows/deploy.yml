@@ -5,7 +5,6 @@ on:
     branches:
       - master
 
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -37,24 +36,20 @@ jobs:
       - name: Build with Maven
         run: ./mvnw clean package -DskipTests
 
-
       - name: Get current time
-        uses: 1466587594/get-current-time@v2
         id: current-time
-        with:
-          format: YYYY-MM-DDTHH-mm-ss
-          utcOffset: "+09:00"
+        run: echo "::set-output name=formattedTime::$(TZ=Asia/Seoul date +'%Y-%m-%dT%H:%M:%S')"
 
       - name: Show Current Time
-        run: echo "CurrentTime=${{steps.current-time.outputs.formattedTime}}"
+        run: echo "CurrentTime=${{ steps.current-time.outputs.formattedTime }}"
 
       - name: Generate deployment package
-          run:
-            mkdir -p deploy
-            cp build/libs/*.jar deploy/application.jar
-            cp Procfile deploy/Procfile
-            cp -r .ebextensions deploy/.ebextensions
-            cd deploy && zip -r deploy.zip 
+        run: |
+          mkdir -p deploy
+          cp build/libs/*.jar deploy/application.jar
+          cp Procfile deploy/Procfile
+          cp -r .ebextensions deploy/.ebextensions
+          cd deploy && zip -r deploy.zip .
 
       - name: Deploy to EB
         uses: einaregilsson/beanstalk-deploy@v21
@@ -63,7 +58,7 @@ jobs:
           aws_secret_key: ${{ secrets.AWS_SECRET_KEY }}
           application_name: todayExercise2
           environment_name: TodayExercise2-env
-          version_label: aws-v5-${{steps.current-time.outputs.formattedTime}}
+          version_label: aws-v5-${{ steps.current-time.outputs.formattedTime }}
           region: us-east-1
           deployment_package: deploy/deploy.zip
 
@@ -79,4 +74,3 @@ jobs:
           aws rds modify-db-instance \
             --db-instance-identifier your-rds-instance-id \
             --master-user-password your-new-rds-password
-
