@@ -140,7 +140,7 @@ public class ChallengeService {
 @Transactional
 public List<GetChallengeDTO> getAllChallengesByUserId(String userId) {
         List<Challenge> challenges = challengeRepository.findAllByUserId(userId);
-
+//수저수저
     List<GetChallengeDTO> getChallengeDTOList = new ArrayList<>();
     for(Challenge challenge:challenges){
         GetChallengeDTO getChallengeDTO = new GetChallengeDTO();
