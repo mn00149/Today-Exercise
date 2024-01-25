@@ -63,7 +63,7 @@ jobs:
           application_name: todayExercise
           environment_name: TodayExercise-env
           version_label: aws-v5-${{steps.current-time.outputs.formattedTime}}
-          region: ap-northeast-2
+          region: us-east-1
           deployment_package: deploy/deploy.zip
 
       - name: Set up AWS CLI
