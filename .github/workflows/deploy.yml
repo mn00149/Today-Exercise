@@ -4,7 +4,7 @@ name: CI/CD
 # 워크 플로우가 시작될 브랜치 지정
 on:
   push:
-    branches: [ main ]
+    branches: [ maㄴㅅㄷㄱ ]
 
 jobs:
   build:
