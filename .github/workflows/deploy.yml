@@ -5,21 +5,10 @@ on:
     branches:
       - master
 
-
 jobs:
   build:
     runs-on: ubuntu-latest
 
-    services:
-      redis:
-        image: redis
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 3
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -37,14 +26,11 @@ jobs:
         run: ./mvnw clean package -DskipTests
 
       - name: Get current time
-        uses: 1466587594/get-current-time@v2
         id: current-time
-        with:
-          format: YYYY-MM-DDTHH-mm-ss
-          utcOffset: "+09:00"
+        run: echo "::set-output name=formattedTime::$(TZ=Asia/Seoul date +'%Y-%m-%dT%H:%M:%S')"
 
       - name: Show Current Time
-        run: echo "CurrentTime=${{steps.current-time.outputs.formattedTime}}"
+        run: echo "CurrentTime=${{ steps.current-time.outputs.formattedTime }}"
 
       - name: Generate deployment package
         run: |
@@ -53,14 +39,15 @@ jobs:
           cp Procfile deploy/Procfile
           cp -r .ebextensions deploy/.ebextensions
           cd deploy && zip -r deploy.zip .
+
       - name: Deploy to EB
         uses: einaregilsson/beanstalk-deploy@v21
         with:
           aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
           aws_secret_key: ${{ secrets.AWS_SECRET_KEY }}
-          application_name: todayExercise2
-          environment_name: TodayExercise2-env
-          version_label: aws-v5-${{steps.current-time.outputs.formattedTime}}
+          application_name: todayExercise
+          environment_name: TodayExercise-env
+          version_label: aws-v5-${{ steps.current-time.outputs.formattedTime }}
           region: us-east-1
           deployment_package: deploy/deploy.zip
 
@@ -69,7 +56,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
-          aws-region: us-east-2
+          aws-region: ap-northeast-2
 
       - name: Update RDS Database
         run: |
