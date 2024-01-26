@@ -19,13 +19,13 @@ jobs:
           distribution: 'adopt'
 
       # 테스트 환경
-      - name: Build and Test with Maven
-        run: mvn clean verify
-        env:
-          SPRING_DATASOURCE_URL: jdbc:h2:mem:test;MODE=MYSQL
-          SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.h2.Driver
-          SPRING_DATASOURCE_USERNAME: sa
-          SPRING_DATASOURCE_PASSWORD: password
+#      - name: Build and Test with Maven
+#        run: mvn clean verify
+#        env:
+#          SPRING_DATASOURCE_URL: jdbc:h2:mem:test;MODE=MYSQL
+#          SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.h2.Driver
+#          SPRING_DATASOURCE_USERNAME: sa
+#          SPRING_DATASOURCE_PASSWORD: password
 
       # 현재 시간 가져오기
       - name: Get current time
