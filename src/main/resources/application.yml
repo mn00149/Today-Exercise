@@ -5,6 +5,12 @@ server:
       charset: utf-8
 
 spring:
+  redis:
+    host: ${REDIS_HOSTNAME}
+    port: 6379
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
   datasource:
     url: jdbc:h2:mem:test
     driver-class-name: org.h2.Driver
