@@ -92,7 +92,6 @@ public class ChallengeService {
             userChallenge.setChallenge(challenge);
             userChallenge.setIsOwner("N");
             userChallengeRepository.save(userChallenge);
-
         }
         finally {
             redisLockRepository.unlock(1L);
