@@ -41,7 +41,7 @@ public class ChallengeController {
 
     //챌린지 참여
     @PostMapping("/challenges/{challenge_id}")
-    public CMRespDTO<?> participateChallenges(HttpServletRequest request, @PathVariable Long challenge_id){
+    public CMRespDTO<?> participateChallenges(HttpServletRequest request, @PathVariable Long challenge_id) throws InterruptedException {
         String userId = new CustomUtil().getUserIdByJWT(request);
         ParticipatedChallengeDTO participatedChallengeDTO = challengeService.participateChallenge(userId, challenge_id);
         return new CMRespDTO<>(1,"챌린지 참여성공", participatedChallengeDTO);
@@ -78,7 +78,7 @@ public class ChallengeController {
     public CMRespDTO<?> getReplyInRecord(@PathVariable Long record_id){
         List<ReplyDTO> replyList = recordService.getAllReplyByRecordId(record_id);
 
-        return new CMRespDTO<>(1,"챌린지 댓글쓰기 성공", replyList);
+        return new CMRespDTO<>(1,"챌린지 댓글불러오기 성공", replyList);
     }
 
 }

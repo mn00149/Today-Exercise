@@ -13,6 +13,7 @@ import com.todayexercise.record.dto.PostRecordDTO;
 import com.todayexercise.record.dto.ResponseRecordDTO;
 import com.todayexercise.record.model.Record;
 import com.todayexercise.record.repository.RecordRepository;
+import com.todayexercise.redis.repository.RedisLockRepository;
 import com.todayexercise.reply.dto.CreatedReplyDTO;
 import com.todayexercise.reply.model.Reply;
 import com.todayexercise.reply.repository.ReplyRepository;
@@ -38,6 +39,8 @@ public class ChallengeService {
     ChallengeCategoryRepository challengeCategoryRepository;
     @Autowired
     RecordRepository recordRepository;
+    @Autowired
+    RedisLockRepository redisLockRepository;
     @Autowired
     UserService userService;
     @Autowired
@@ -71,24 +74,35 @@ public class ChallengeService {
     };
 
     @Transactional
-    public ParticipatedChallengeDTO participateChallenge(String userId, Long challenge_id) {
+    public ParticipatedChallengeDTO participateChallenge(String userId, Long challenge_id) throws InterruptedException {
         User user = userService.findByUserId(userId);
         int num = 1;
         //에러처리 하자!!
         Challenge challenge = challengeRepository.findById(challenge_id).get();
         int personnel = challenge.getPersonnel();
-        if(personnel>0) {
-            challenge.decrease(1);
-        }else return null;
-        UserChallenge userChallenge = new UserChallenge();
-        userChallenge.setUser(user);
-        userChallenge.setChallenge(challenge);
-        userChallenge.setIsOwner("N");
-        userChallengeRepository.save(userChallenge);
-        ParticipatedChallengeDTO participatedChallengeDTO = new ParticipatedChallengeDTO();
-        participatedChallengeDTO.setChallenge_id(challenge.getId());
-        participatedChallengeDTO.setChallengeName(challenge.getChallengeName());
-        return participatedChallengeDTO;
+        while (!redisLockRepository.lock(1L)){
+            Thread.sleep(100);
+        }
+        try {
+            if (personnel > 0) {
+                challenge.decrease(1);
+            } else return null;
+            UserChallenge userChallenge = new UserChallenge();
+            userChallenge.setUser(user);
+            userChallenge.setChallenge(challenge);
+            userChallenge.setIsOwner("N");
+            userChallengeRepository.save(userChallenge);
+
+        }
+        finally {
+            redisLockRepository.unlock(1L);
+            ParticipatedChallengeDTO participatedChallengeDTO = new ParticipatedChallengeDTO();
+            participatedChallengeDTO.setChallenge_id(challenge.getId());
+            participatedChallengeDTO.setChallengeName(challenge.getChallengeName());
+            return participatedChallengeDTO;
+
+        }
+
     }
     @Transactional
     public ResponseRecordDTO createRecord(String userId, Long challenge_id, PostRecordDTO postRecordDTO) {
